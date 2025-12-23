@@ -61,7 +61,8 @@ npm run dev
 
 Acesse http://localhost:3000.
 
-Como Funciona
+Como Funciona:
+
 Ingestão: Script Python quebra o PDF em chunks e salva os vetores no Supabase.
 
 Pergunta: O usuário envia uma dúvida.
