@@ -28,9 +28,6 @@ O **MentorIA** é um sistema de **RAG (Retrieval-Augmented Generation)** que rod
 
 ## ⚙️ Instalação e Configuração
 
-### 1. Pré-requisitos (Ollama)
-Certifique-se de ter o Ollama instalado. No terminal, baixe os modelos:
-
 ```bash
 ollama pull llama3.2:1b
 ollama pull nomic-embed-text
