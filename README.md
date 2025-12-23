@@ -1,98 +1,87 @@
-# MentorIA - Local RAG System with Strict Validation
+#  MentorIA - RAG Local com Validação Estrita
 
-O **MentorIA** é um assistente inteligente baseado em arquitetura **RAG (Retrieval-Augmented Generation)** que roda 100% localmente. O projeto foi desenhado para analisar documentos técnicos e responder perguntas com **zero custo de API**, privacidade total e, principalmente, **mecanismos robustos contra alucinação**.
+O **MentorIA** é um sistema de **RAG (Retrieval-Augmented Generation)** que roda 100% localmente para analisar documentos técnicos. O foco do projeto é a **Engenharia de Software** aplicada à IA para resolver problemas de alucinação, privacidade e latência.
 
 ---
 
-## 🚀 Diferenciais de Engenharia
+##  Demonstração
 
-Diferente de wrappers simples de IA, o MentorIA implementa lógicas avançadas de backend:
+| Estrutura do Projeto | Bloqueio de Alucinação |
+|:--------------------:|:----------------------:|
+| <img src="./public/print-estrutura.png" width="300" alt="Estrutura de Pastas" /> | <img src="./public/print-bloqueio.png" width="300" alt="IA bloqueando pergunta fora do contexto" /> |
 
-- **🛡️ Guardrails Anti-Alucinação:** Utiliza um algoritmo de *Cosine Similarity* com threshold rigoroso (`0.50`). Se a pergunta foge do contexto do documento (ex: perguntar de futebol em um texto médico), o sistema bloqueia a resposta antes mesmo de chamar a LLM.
-- **❄️ Tratamento de Cold Start:** Implementação de um padrão de **Retry com Backoff Exponencial**. Se o modelo local (Ollama) estiver descarregado da RAM, o backend aguarda e retenta a conexão automaticamente, evitando erros para o usuário.
-- **⚡ Busca Vetorial Otimizada:** Utiliza índices **HNSW** (Hierarchical Navigable Small World) no PostgreSQL, permitindo buscas semânticas em milissegundos.
-- **💬 Streaming em Tempo Real:** Respostas geradas token a token para uma UX fluida.
+*(Substitua os caminhos acima pelas imagens do seu projeto)*
+
+---
+
+##  Diferenciais de Engenharia
+
+1.  **🛡️ Guardrails Anti-Alucinação:** Implementação de um *Cosine Similarity Threshold* de `0.50`. Perguntas fora do contexto (ex: "Futebol" em um TCC de Farmácia) são bloqueadas matematicamente antes de acionar a LLM.
+2.  **❄️ Resiliência (Cold Start):** Sistema de **Retry com Backoff Exponencial**. Se o Ollama estiver descarregado da RAM, o backend aguarda e reconecta automaticamente.
+3.  **⚡ Performance:** Uso de índices **HNSW** no Supabase para buscas vetoriais em milissegundos.
+4.  **🏗️ Arquitetura Sólida:** Separação clara entre Ingestão (Python), Banco de Dados (Drizzle ORM) e API (Next.js).
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Core
-- **Frontend:** [Next.js 14](https://nextjs.org/) (App Router), Tailwind CSS.
+- **Frontend:** Next.js 14 (App Router), Tailwind CSS.
 - **Backend:** Next.js Server Actions & API Routes.
-- **Linguagem:** TypeScript.
-
-### Dados & IA
-- **Database:** [Supabase](https://supabase.com/) (PostgreSQL + `pgvector`).
-- **ORM:** [Drizzle ORM](https://orm.drizzle.team/).
-- **AI Engine (Local):** [Ollama](https://ollama.com/).
-- **Modelos:**
-  - LLM: `llama3.2:1b` (Geração de texto rápida e leve).
-  - Embeddings: `nomic-embed-text` (Vetorização de alta fidelidade).
-
-### Ingestão
-- **Scripts:** Python (para processamento de PDFs e *chunking*).
+- **Database:** Supabase (PostgreSQL + pgvector).
+- **ORM:** Drizzle ORM.
+- **AI Engine:** Ollama (Local).
+  - Modelo: `llama3.2:1b`
+  - Embeddings: `nomic-embed-text`
+- **Ingestão:** Python scripts.
 
 ---
 
-# Baixe os modelos necessários
+## ⚙️ Instalação e Configuração
+
+### 1. Pré-requisitos (Ollama)
+Certifique-se de ter o Ollama instalado. No terminal, baixe os modelos:
 
 ```bash
 ollama pull llama3.2:1b
 ollama pull nomic-embed-text
 
-```bash
--- Habilitar pgvector
+-- Habilitar extensão vetorial
 create extension vector;
 
--- Tabela de Embeddings (exemplo simplificado)
+-- Tabela de Embeddings
 create table embeddings (
   id serial primary key,
   content text not null,
-  embedding vector(768) -- Ajuste conforme o modelo nomic
+  embedding vector(768) -- Compatível com nomic-embed-text
 );
 
---  Índice HNSW para performance extrema
+-- Índice HNSW para performance extrema
 create index on embeddings using hnsw (embedding vector_cosine_ops);
 
-```bash
+# Clone o repositório
 git clone https://github.com/eduardocarvalho21/Mentor_IA.git
-cd mentoria
+
+# Entre na pasta
+cd Mentor_IA
+
+# Instale as dependências
 npm install
 
-```bash
-DATABASE_URL=postgres://user:pass@host:5432/db
+DATABASE_URL=postgres://usuario:senha@host:6543/postgres
 NEXT_PUBLIC_API_URL=http://localhost:3000
 
-```bash
 npm run dev
 
-Acesse **http://localhost:3000.**
+Acesse http://localhost:3000.
 
-Como Funciona o "Cérebro" (Fluxo RAG)
-Input: O usuário faz uma pergunta.
+Como Funciona
+Ingestão: Script Python quebra o PDF em chunks e salva os vetores no Supabase.
 
-Embedding: O backend converte a pergunta em vetor usando nomic-embed-text.
+Pergunta: O usuário envia uma dúvida.
 
-Vector Search: O Supabase busca os trechos de texto mais similares.
+Validação: O Backend calcula a similaridade. Se < 0.50, retorna "Não consta no documento".
 
-Filtro (The Guardrail):
+Resposta: Se aprovado, o Llama 3.2 recebe o contexto e gera a resposta via Stream.
 
-Se similaridade < 0.50 ➡️ Retorna "Não consta no documento."
-
-Se similaridade >= 0.50 ➡️ Segue para o próximo passo.
-
-Geração: O contexto recuperado + a pergunta são enviados ao Llama 3.2 com um System Prompt estrito.
-
-Output: A resposta é transmitida via stream para o frontend.
-
-🤝 Contribuição
-Contribuições são bem-vindas! Sinta-se à vontade para abrir Issues ou Pull Requests.
-
-📝 Licença
-Este projeto está sob a licença MIT.
-
-<div align="center"> Desenvolvido por <strong>Eduardo Pereira de Carvalho</strong>
-
-
-<span>Software Developer | Fullstack | AI Enthusiast</span> </div>
+Licença
+Desenvolvido por Eduardo Pereira de Carvalho.
