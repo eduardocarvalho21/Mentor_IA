@@ -4,14 +4,6 @@ O **MentorIA** é um sistema de **RAG (Retrieval-Augmented Generation)** que rod
 
 ---
 
-##  Demonstração
-
-| Estrutura do Projeto | Bloqueio de Alucinação |
-|:--------------------:|:----------------------:|
-| <img src="./public/print-estrutura.png" width="300" alt="Estrutura de Pastas" /> | <img src="./public/print-bloqueio.png" width="300" alt="IA bloqueando pergunta fora do contexto" /> |
-
-*(Substitua os caminhos acima pelas imagens do seu projeto)*
-
 ---
 
 ##  Diferenciais de Engenharia
