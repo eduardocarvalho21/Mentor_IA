@@ -4,8 +4,6 @@ O **MentorIA** é um sistema de **RAG (Retrieval-Augmented Generation)** que rod
 
 ---
 
----
-
 ##  Diferenciais de Engenharia
 
 1.  **🛡️ Guardrails Anti-Alucinação:** Implementação de um *Cosine Similarity Threshold* de `0.50`. Perguntas fora do contexto (ex: "Futebol" em um TCC de Farmácia) são bloqueadas matematicamente antes de acionar a LLM.
